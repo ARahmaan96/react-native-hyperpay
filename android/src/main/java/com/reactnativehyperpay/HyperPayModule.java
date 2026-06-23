@@ -1,7 +1,6 @@
 package com.reactnativehyperpay;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import com.facebook.react.bridge.Arguments;
@@ -37,7 +36,6 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     private String merchantIdentifier;
     private String countryCode;
     private String mode;
-    private boolean enable3DS = false;
 
     public HyperPayModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -61,8 +59,6 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             countryCode = params.getString("countryCode");
         if (params.hasKey("mode"))
             mode = params.getString("mode");
-        if (params.hasKey("enable3DS"))
-            enable3DS = params.getBoolean("enable3DS");
         config.putString("shopperResultURL", shopperResultURL);
         config.putString("merchantIdentifier", merchantIdentifier);
         config.putString("countryCode", countryCode);
@@ -104,14 +100,12 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
                         : Connect.ProviderMode.TEST;
                 OppPaymentProvider paymentProvider = new OppPaymentProvider(currentActivity, providerMode);
 
-                if (enable3DS) {
-                    paymentProvider.setThreeDSWorkflowListener(new ThreeDSWorkflowListener() {
+                paymentProvider.setThreeDSWorkflowListener(new ThreeDSWorkflowListener() {
                         @Override
                         public Activity onThreeDSChallengeRequired() {
                             return getCurrentActivity();
                         }
                     });
-                }
                 transaction = new Transaction(paymentParams);
                 paymentProvider.submitTransaction(transaction, this);
             } catch (PaymentException e) {

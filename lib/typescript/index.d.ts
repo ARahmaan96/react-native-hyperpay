@@ -8,7 +8,7 @@ export type CreateTransactionResponseType = {
     redirectURL: string
 }
 export interface Config {
-    shopperResultURL: string;
+    shopperResultURL?: string;
     /**
     * required for apple pay
     */
@@ -30,13 +30,6 @@ export interface Config {
     * @Platform IOS Only 
     */
     supportedNetworks?: Array<SupportedNetworks>
-
-    /**
-     * Enable native 3DS challenge UI.
-     * When false (default), the SDK returns the redirect URL for JS to handle.
-     * When true, the native 3DS challenge UI is shown.
-     */
-    enable3DS?: boolean;
 
 }
 
