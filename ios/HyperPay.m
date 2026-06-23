@@ -69,8 +69,6 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
       reject(@"createTransaction",error.localizedDescription, error);
 
     } else {
-       params.shopperResultURL =shopperResultURL;
-       
       OPPTransaction *transaction = [OPPTransaction transactionWithPaymentParams:params];
 
       [provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
@@ -119,7 +117,6 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
         paymentRequest.paymentSummaryItems = @[[PKPaymentSummaryItem summaryItemWithLabel:companyName amount:amount]];
  
     
-  checkoutSettings.shopperResultURL=shopperResultURL;
   checkoutSettings.applePayPaymentRequest = paymentRequest;
   OPPCheckoutProvider *checkoutProvider = [OPPCheckoutProvider checkoutProviderWithPaymentProvider:provider
                                                                                         checkoutID:[params valueForKey:@"checkoutID"]
