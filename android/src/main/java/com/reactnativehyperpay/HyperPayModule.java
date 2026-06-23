@@ -87,9 +87,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             if (params.hasKey("shopperResultURL")) {
                 shopperResultURL = params.getString("shopperResultURL");
             }
-            if (enable3DS) {
-                paymentParams.setShopperResultUrl(shopperResultURL);
-            }
+            paymentParams.setShopperResultUrl(shopperResultURL);
             Transaction transaction = null;
 
             try {

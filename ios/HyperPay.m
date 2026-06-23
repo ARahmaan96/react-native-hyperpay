@@ -72,9 +72,7 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
       reject(@"createTransaction",error.localizedDescription, error);
 
     } else {
-        if (enable3DS) {
-            params.shopperResultURL = shopperResultURL;
-        }
+        params.shopperResultURL = shopperResultURL;
       OPPTransaction *transaction = [OPPTransaction transactionWithPaymentParams:params];
 
       [provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
@@ -112,8 +110,8 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
       OPPThreeDSConfig *threeDSConfig = [[OPPThreeDSConfig alloc] init];
       threeDSConfig.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
       checkoutSettings.threeDSConfig = threeDSConfig;
-      checkoutSettings.shopperResultURL = shopperResultURL;
   }
+  checkoutSettings.shopperResultURL = shopperResultURL;
 
   PKPaymentRequest *paymentRequest = [OPPPaymentProvider paymentRequestWithMerchantIdentifier:merchantIdentifier countryCode:countryCode];
   paymentRequest.supportedNetworks = supportedNetworks;
