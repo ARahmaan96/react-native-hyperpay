@@ -1,0 +1,46 @@
+node_modules/
+.yarn/
+*.log
+
+# Xcode
+ios/Pods/
+ios/build/
+build/
+*.xcworkspace
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+**/.xcode.env
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
+
+# Metro bundler
+.metro-health-check*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.orig
+
+# TypeScript
+*.tsbuildinfo
+
+# NPM
+package-lock.json
