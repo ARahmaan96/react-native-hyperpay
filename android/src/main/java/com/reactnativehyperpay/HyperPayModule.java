@@ -23,6 +23,7 @@ import com.oppwa.mobile.connect.provider.Connect;
 import com.oppwa.mobile.connect.provider.ITransactionListener;
 import com.oppwa.mobile.connect.provider.OppPaymentProvider;
 import com.oppwa.mobile.connect.provider.ThreeDSWorkflowListener;
+import com.oppwa.mobile.connect.provider.threeds.v2.model.ThreeDSConfig;
 import com.oppwa.mobile.connect.provider.Transaction;
 import com.oppwa.mobile.connect.provider.TransactionType;
 
@@ -102,6 +103,16 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
                         @Override
                         public Activity onThreeDSChallengeRequired() {
                             return getCurrentActivity();
+                        }
+
+                        @Override
+                        public ThreeDSConfig onThreeDSConfigRequired() {
+                            ThreeDSConfig.Builder builder = new ThreeDSConfig.Builder();
+                            if (countryCode != null && !countryCode.isEmpty()) {
+                                builder.addClientConfigParam("OverrideCountryCode", countryCode);
+                            }
+                            builder.addClientConfigParam("AcceptAnyACSCert", "true");
+                            return builder.build();
                         }
                     });
                 transaction = new Transaction(paymentParams);
