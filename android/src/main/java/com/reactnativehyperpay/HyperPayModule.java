@@ -97,7 +97,11 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
                     paymentProvider.setThreeDSWorkflowListener(new ThreeDSWorkflowListener() {
                         @Override
                         public Activity onThreeDSChallengeRequired() {
-                            return getCurrentActivity();
+                            Activity activity = getCurrentActivity();
+                            if (activity == null) {
+                                throw new PaymentException("Current activity is null, cannot show 3DS challenge");
+                            }
+                            return activity;
                         }
                     });
                 }

@@ -56,9 +56,6 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(setup: (NSDictionary*)options) {
       provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeLive];
     else
       provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeTest];
-    if (enable3DS) {
-        provider.threeDSEventListener = self;
-    }
     return options;
 }
 
@@ -83,6 +80,9 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
         params.shopperResultURL = shopperResultURL;
       OPPTransaction *transaction = [OPPTransaction transactionWithPaymentParams:params];
 
+      if (enable3DS) {
+          provider.threeDSEventListener = self;
+      }
       [provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
         NSDictionary *transactionResult;
         if (transaction.type == OPPTransactionTypeAsynchronous) {
@@ -186,16 +186,26 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
     dispatch_async(dispatch_get_main_queue(), ^{
         UIViewController *rootVC = nil;
         if (@available(iOS 13.0, *)) {
-            UIWindowScene *windowScene = (UIWindowScene *)UIApplication.sharedApplication.connectedScenes.anyObject;
-            rootVC = windowScene.windows.firstObject.rootViewController;
-        } else {
+            for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+                if ([scene isKindOfClass:[UIWindowScene class]]) {
+                    UIWindowScene *windowScene = (UIWindowScene *)scene;
+                    rootVC = windowScene.windows.firstObject.rootViewController;
+                    break;
+                }
+            }
+        }
+        if (!rootVC) {
             rootVC = UIApplication.sharedApplication.keyWindow.rootViewController;
         }
         UINavigationController *nav = [[UINavigationController alloc] init];
         self.threeDSNavController = nav;
-        [rootVC presentViewController:nav animated:YES completion:^{
+        if (rootVC) {
+            [rootVC presentViewController:nav animated:YES completion:^{
+                completion(nav);
+            }];
+        } else {
             completion(nav);
-        }];
+        }
     });
 }
 
