@@ -87,7 +87,9 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             if (params.hasKey("shopperResultURL")) {
                 shopperResultURL = params.getString("shopperResultURL");
             }
-            paymentParams.setShopperResultUrl(shopperResultURL);
+            if (shopperResultURL != null) {
+                paymentParams.setShopperResultUrl(shopperResultURL);
+            }
             Transaction transaction = null;
 
             try {
@@ -102,7 +104,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
                     });
                 }
 
-                if (mode.equals("LiveMode")) {
+                if ("LiveMode".equals(mode)) {
                     paymentProvider.setProviderMode(Connect.ProviderMode.LIVE);
                 }
                 transaction = new Transaction(paymentParams);
@@ -131,6 +133,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
 
         if (transaction.getTransactionType() == TransactionType.SYNC) {
             paymentResponse.putString("status", "completed");
+            paymentResponse.putString("resourcePath", transaction.getResourcePath());
         } else {
             paymentResponse.putString("status", "pending");
             paymentResponse.putString("redirectURL", transaction.getRedirectUrl());

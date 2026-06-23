@@ -99,6 +99,7 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
 
           transactionResult = @{
           @"status":@"completed",
+          @"resourcePath":transaction.resourcePath ?: @"",
           @"checkoutId":transaction.paymentParams.checkoutID
           };
           [self dismissThreeDSNavController];
@@ -122,7 +123,7 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
       threeDSConfig.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
       checkoutSettings.threeDSConfig = threeDSConfig;
   }
-  checkoutSettings.shopperResultURL = shopperResultURL;
+  checkoutSettings.shopperResultURL = shopperResultURL.length > 0 ? shopperResultURL : nil;
 
   PKPaymentRequest *paymentRequest = [OPPPaymentProvider paymentRequestWithMerchantIdentifier:merchantIdentifier countryCode:countryCode];
   paymentRequest.supportedNetworks = supportedNetworks;
