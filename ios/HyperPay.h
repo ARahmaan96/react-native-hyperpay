@@ -5,7 +5,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-@interface HyperPay : RCTEventEmitter <RCTBridgeModule>
+@interface HyperPay : RCTEventEmitter <RCTBridgeModule, OPPThreeDSEventListener>
 
 @end
 

@@ -2,6 +2,11 @@
 #import <Foundation/Foundation.h>
 #import "HyperPay.h"
 #import <React/RCTLog.h>
+#import <UIKit/UIKit.h>
+
+@interface HyperPay ()
+@property (nonatomic, strong) UINavigationController *threeDSNavController;
+@end
 
 @implementation HyperPay
 
@@ -51,6 +56,9 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(setup: (NSDictionary*)options) {
       provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeLive];
     else
       provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeTest];
+    if (enable3DS) {
+        provider.threeDSEventListener = self;
+    }
     return options;
 }
 
@@ -84,6 +92,7 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
           @"status":@"pending",
           @"checkoutId":transaction.paymentParams.checkoutID
           };
+          [self dismissThreeDSNavController];
           resolve(transactionResult);
 
         }  else if (transaction.type == OPPTransactionTypeSynchronous) {
@@ -92,8 +101,10 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
           @"status":@"completed",
           @"checkoutId":transaction.paymentParams.checkoutID
           };
+          [self dismissThreeDSNavController];
           resolve(transactionResult);
         } else {
+          [self dismissThreeDSNavController];
           reject(@"createTransaction",error.localizedDescription, error);
         }
       }];
@@ -152,6 +163,41 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
 
 }
 
+
+- (void)dismissThreeDSNavController {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.threeDSNavController) {
+            [self.threeDSNavController dismissViewControllerAnimated:YES completion:nil];
+            self.threeDSNavController = nil;
+        }
+    });
+}
+
+#pragma mark - OPPThreeDSEventListener
+
+- (void)onThreeDSConfigRequiredWithCompletion:(void (^)(OPPThreeDSConfig *config))completion {
+    OPPThreeDSConfig *config = [[OPPThreeDSConfig alloc] init];
+    config.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
+    config.clientConfigParams = @{@"AcceptAnyACSCert": @"true"};
+    completion(config);
+}
+
+- (void)onThreeDSChallengeRequiredWithCompletion:(void (^)(UINavigationController *navController))completion {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIViewController *rootVC = nil;
+        if (@available(iOS 13.0, *)) {
+            UIWindowScene *windowScene = (UIWindowScene *)UIApplication.sharedApplication.connectedScenes.anyObject;
+            rootVC = windowScene.windows.firstObject.rootViewController;
+        } else {
+            rootVC = UIApplication.sharedApplication.keyWindow.rootViewController;
+        }
+        UINavigationController *nav = [[UINavigationController alloc] init];
+        self.threeDSNavController = nav;
+        [rootVC presentViewController:nav animated:YES completion:^{
+            completion(nav);
+        }];
+    });
+}
 
 @end
 
