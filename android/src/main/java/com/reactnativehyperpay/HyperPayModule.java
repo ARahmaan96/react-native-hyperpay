@@ -50,8 +50,10 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     @ReactMethod(isBlockingSynchronousMethod = true)
     public WritableMap setup(ReadableMap params) {
         WritableMap config = Arguments.createMap();
-        if (params.hasKey("shopperResultURL"))
+        if (params.hasKey("shopperResultURL") && !params.isNull("shopperResultURL"))
             shopperResultURL = params.getString("shopperResultURL");
+        if (isNullOrEmpty(shopperResultURL))
+            shopperResultURL = getDefaultShopperResultURL();
         if (params.hasKey("merchantIdentifier"))
             merchantIdentifier = params.getString("merchantIdentifier");
         if (params.hasKey("countryCode"))
@@ -79,10 +81,13 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
                     params.getString("expiryYear"),
                     params.getString("cvv"));
 
-            if (params.hasKey("shopperResultURL")) {
+            if (params.hasKey("shopperResultURL") && !params.isNull("shopperResultURL")) {
                 shopperResultURL = params.getString("shopperResultURL");
             }
-            if (shopperResultURL != null) {
+            if (isNullOrEmpty(shopperResultURL)) {
+                shopperResultURL = getDefaultShopperResultURL();
+            }
+            if (!isNullOrEmpty(shopperResultURL)) {
                 paymentParams.setShopperResultUrl(shopperResultURL);
             }
             Transaction transaction = null;
@@ -130,6 +135,14 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     private void emitListeners(String eventName, boolean isLoading) {
         getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("onProgress", isLoading);
+    }
+
+    private String getDefaultShopperResultURL() {
+        return "oppwacheckout://" + getReactApplicationContext().getPackageName() + ".result";
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 
     @Override

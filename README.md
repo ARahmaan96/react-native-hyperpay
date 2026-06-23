@@ -42,19 +42,19 @@ npm install react-native-hyperpay
 <details>
 <summary><strong>Android additional setup</strong></summary>
 
-1. Add the required intent filter to your `AndroidManifest.xml`:
-   ```xml
-   <activity android:name="com.hyperpay.activities.PaymentActivity"
-     android:launchMode="singleTask"
-     android:configChanges="orientation|screenSize">
-     <intent-filter>
-       <action android:name="android.intent.action.VIEW" />
-       <category android:name="android.intent.category.DEFAULT" />
-       <category android:name="android.intent.category.BROWSABLE" />
-       <data android:scheme="YOUR_APP_SCHEME" />
-     </intent-filter>
-   </activity>
+1. Use the OPPWA Android callback URL as your Android `shopperResultURL`:
+   ```ts
+   shopperResultURL: 'oppwacheckout://YOUR_ANDROID_APPLICATION_ID.result'
    ```
+
+   Example for application id `com.example.app`:
+   ```ts
+   shopperResultURL: 'oppwacheckout://com.example.app.result'
+   ```
+
+   The OPPWA Android SDK already contributes the required callback activity through manifest merging. Do not add `com.hyperpay.activities.PaymentActivity`; this package does not provide that activity.
+
+2. Make sure the exact Android callback URL is whitelisted/used when creating the checkout on your backend.
 </details>
 
 ## Quick Start
