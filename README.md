@@ -1,6 +1,6 @@
 # react-native-hyperpay
 
-React Native payment SDK for Hyperpay / OP-Payment services using **OPPWA Mobile SDK v4.6.0**. Supports credit/debit cards, Apple Pay, bank transfers, and virtual/alternative payment methods across iOS and Android.
+React Native payment SDK for Hyperpay / OP-Payment services using **OPPWA Mobile SDK v7.11.0**. Supports credit/debit cards, Apple Pay, bank transfers, and virtual/alternative payment methods across iOS and Android.
 
 ## Installation
 
@@ -35,6 +35,8 @@ npm install react-native-hyperpay
    ```
 
 3. Enable Apple Pay capability in Xcode and add your merchant identifier.
+
+**Note:** Minimum iOS deployment target must be **12.0** or higher.
 </details>
 
 <details>

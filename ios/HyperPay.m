@@ -103,6 +103,11 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
 RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject){
   
   OPPCheckoutSettings *checkoutSettings = [[OPPCheckoutSettings alloc] init];
+
+  OPPThreeDSConfig *threeDSConfig = [[OPPThreeDSConfig alloc] init];
+  threeDSConfig.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
+  checkoutSettings.threeDSConfig = threeDSConfig;
+
   PKPaymentRequest *paymentRequest = [OPPPaymentProvider paymentRequestWithMerchantIdentifier:merchantIdentifier countryCode:countryCode];
   paymentRequest.supportedNetworks = supportedNetworks;
   

@@ -9,10 +9,10 @@ Pod::Spec.new do |s|
   s.homepage     = package["homepage"]
   s.license      = package["license"]
   s.authors      = package["author"]
-  s.platforms    = { :ios => "10.0" }
+  s.platforms    = { :ios => "12.0" }
   s.source       = { :git => "git@github.com:ARahmaan96/react-native-hyperpay.git", :tag => "#{s.version}" }
   s.source_files = "ios/**/*.{h,m,mm}"
   s.dependency "React-Core"
   s.requires_arc = true
-  s.vendored_frameworks = "OPPWAMobile.xcframework","ipworks3ds_sdk.xcframework"
+  s.vendored_frameworks = "OPPWAMobile.xcframework","ipworks3ds_sdk.xcframework","ipworks3ds_sdk_deploy.xcframework"
 end
