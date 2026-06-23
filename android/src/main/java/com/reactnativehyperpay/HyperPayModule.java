@@ -30,7 +30,6 @@ import com.oppwa.mobile.connect.provider.TransactionType;
 public class HyperPayModule extends ReactContextBaseJavaModule implements ITransactionListener {
     public static final String NAME = "HyperPay";
 
-    private Context appContext;
     private Promise promisePaymentTransaction;
     private String shopperResultURL;
     private String merchantIdentifier;
@@ -39,7 +38,6 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
 
     public HyperPayModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        appContext = reactContext.getApplicationContext();
     }
 
     @Override
