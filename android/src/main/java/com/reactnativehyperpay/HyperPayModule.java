@@ -1,5 +1,6 @@
 package com.reactnativehyperpay;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ import com.oppwa.mobile.connect.payment.card.CardPaymentParams;
 import com.oppwa.mobile.connect.provider.Connect;
 import com.oppwa.mobile.connect.provider.ITransactionListener;
 import com.oppwa.mobile.connect.provider.OppPaymentProvider;
+import com.oppwa.mobile.connect.provider.ThreeDSWorkflowListener;
 import com.oppwa.mobile.connect.provider.Transaction;
 import com.oppwa.mobile.connect.provider.TransactionType;
 
@@ -35,6 +37,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     private String merchantIdentifier;
     private String countryCode;
     private String mode;
+    private boolean enable3DS = false;
 
     public HyperPayModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -58,6 +61,8 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             countryCode = params.getString("countryCode");
         if (params.hasKey("mode"))
             mode = params.getString("mode");
+        if (params.hasKey("enable3DS"))
+            enable3DS = params.getBoolean("enable3DS");
         config.putString("shopperResultURL", shopperResultURL);
         config.putString("merchantIdentifier", merchantIdentifier);
         config.putString("countryCode", countryCode);
@@ -82,10 +87,22 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             if (params.hasKey("shopperResultURL")) {
                 shopperResultURL = params.getString("shopperResultURL");
             }
+            if (enable3DS) {
+                paymentParams.setShopperResultUrl(shopperResultURL);
+            }
             Transaction transaction = null;
 
             try {
                 OppPaymentProvider paymentProvider = new OppPaymentProvider(appContext, Connect.ProviderMode.TEST);
+
+                if (enable3DS) {
+                    paymentProvider.setThreeDSWorkflowListener(new ThreeDSWorkflowListener() {
+                        @Override
+                        public Activity onThreeDSChallengeRequired() {
+                            return getCurrentActivity();
+                        }
+                    });
+                }
 
                 if (mode.equals("LiveMode")) {
                     paymentProvider.setProviderMode(Connect.ProviderMode.LIVE);

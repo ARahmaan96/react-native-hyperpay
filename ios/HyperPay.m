@@ -12,6 +12,7 @@ NSString *countryCode = @"";
 NSString *mode=@"TestMode";
 NSArray *supportedNetworks;
 NSString *companyName=@"";
+BOOL enable3DS = NO;
 
 RCT_EXPORT_MODULE(HyperPay)
 
@@ -44,6 +45,8 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(setup: (NSDictionary*)options) {
        countryCode=[options valueForKey:@"countryCode"];
     if ([options valueForKey:@"supportedNetworks"])
         supportedNetworks=[options valueForKey:@"supportedNetworks"];
+    if ([options valueForKey:@"enable3DS"])
+        enable3DS = [[options valueForKey:@"enable3DS"] boolValue];
     if ([[options valueForKey:@"mode"] isEqual:@"LiveMode"])
       provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeLive];
     else
@@ -69,6 +72,9 @@ RCT_EXPORT_METHOD(createPaymentTransaction: (NSDictionary*)options resolver:(RCT
       reject(@"createTransaction",error.localizedDescription, error);
 
     } else {
+        if (enable3DS) {
+            params.shopperResultURL = shopperResultURL;
+        }
       OPPTransaction *transaction = [OPPTransaction transactionWithPaymentParams:params];
 
       [provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
@@ -102,9 +108,12 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
   
   OPPCheckoutSettings *checkoutSettings = [[OPPCheckoutSettings alloc] init];
 
-  OPPThreeDSConfig *threeDSConfig = [[OPPThreeDSConfig alloc] init];
-  threeDSConfig.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
-  checkoutSettings.threeDSConfig = threeDSConfig;
+  if (enable3DS) {
+      OPPThreeDSConfig *threeDSConfig = [[OPPThreeDSConfig alloc] init];
+      threeDSConfig.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
+      checkoutSettings.threeDSConfig = threeDSConfig;
+      checkoutSettings.shopperResultURL = shopperResultURL;
+  }
 
   PKPaymentRequest *paymentRequest = [OPPPaymentProvider paymentRequestWithMerchantIdentifier:merchantIdentifier countryCode:countryCode];
   paymentRequest.supportedNetworks = supportedNetworks;
