@@ -137,11 +137,12 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
  
     
   checkoutSettings.applePayPaymentRequest = paymentRequest;
-  OPPCheckoutProvider *checkoutProvider = [OPPCheckoutProvider checkoutProviderWithPaymentProvider:provider
+  self.checkoutProvider = [OPPCheckoutProvider checkoutProviderWithPaymentProvider:provider
                                                                                         checkoutID:[params valueForKey:@"checkoutID"]
                                                                                           settings:checkoutSettings];
+  self.checkoutProvider.delegate = self;
 
-  [checkoutProvider presentCheckoutWithPaymentBrand:@"APPLEPAY"
+  [self.checkoutProvider presentCheckoutWithPaymentBrand:@"APPLEPAY"
     loadingHandler:^(BOOL inProgress) {
       [self sendEventWithName:@"onProgress" body:@(inProgress)];
       // Executed whenever SDK sends request to the server or receives the response.
@@ -172,6 +173,14 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
             self.threeDSNavController = nil;
         }
     });
+}
+
+#pragma mark - OPPCheckoutProviderDelegate
+
+- (void)checkoutProvider:(OPPCheckoutProvider *)checkoutProvider
+      continueSubmitting:(OPPTransaction *)transaction
+              completion:(void (^)(NSString * _Nullable, BOOL))completion {
+    completion(nil, YES);
 }
 
 #pragma mark - OPPThreeDSEventListener

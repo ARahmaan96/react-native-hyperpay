@@ -93,7 +93,16 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             Transaction transaction = null;
 
             try {
-                OppPaymentProvider paymentProvider = new OppPaymentProvider(appContext, Connect.ProviderMode.TEST);
+                Activity currentActivity = getCurrentActivity();
+                if (currentActivity == null) {
+                    this.emitListeners("onProgress", false);
+                    promisePaymentTransaction.reject("NO_ACTIVITY", "No foreground activity available");
+                    return;
+                }
+                Connect.ProviderMode providerMode = "LiveMode".equals(mode)
+                        ? Connect.ProviderMode.LIVE
+                        : Connect.ProviderMode.TEST;
+                OppPaymentProvider paymentProvider = new OppPaymentProvider(currentActivity, providerMode);
 
                 if (enable3DS) {
                     paymentProvider.setThreeDSWorkflowListener(new ThreeDSWorkflowListener() {
@@ -102,10 +111,6 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
                             return getCurrentActivity();
                         }
                     });
-                }
-
-                if ("LiveMode".equals(mode)) {
-                    paymentProvider.setProviderMode(Connect.ProviderMode.LIVE);
                 }
                 transaction = new Transaction(paymentParams);
                 paymentProvider.submitTransaction(transaction, this);
