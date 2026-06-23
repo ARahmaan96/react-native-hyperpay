@@ -138,7 +138,6 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
 
         if (transaction.getTransactionType() == TransactionType.SYNC) {
             paymentResponse.putString("status", "completed");
-            paymentResponse.putString("resourcePath", transaction.getResourcePath());
         } else {
             paymentResponse.putString("status", "pending");
             paymentResponse.putString("redirectURL", transaction.getRedirectUrl());
