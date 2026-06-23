@@ -28,8 +28,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('HyperPay_minSdkVersion', 24)
         targetSdkVersion safeExtGet('HyperPay_targetSdkVersion', 35)
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0"
     }
 
     buildTypes {
