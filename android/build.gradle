@@ -46,6 +46,17 @@ android {
     }
 }
 
+// Make the flatDir available to ALL projects (root + subprojects) so the consumer app
+// can transitively resolve AAR dependencies declared via api(name:, ext:)
+def hyperpayLibsDir = "${project.projectDir}/libs"
+rootProject.allprojects { p ->
+    p.repositories {
+        flatDir {
+            dirs hyperpayLibsDir
+        }
+    }
+}
+
 repositories {
     flatDir { dirs 'libs' }
     mavenLocal()
