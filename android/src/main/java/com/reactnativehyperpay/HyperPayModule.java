@@ -2,7 +2,9 @@ package com.reactnativehyperpay;
 
 import android.app.Activity;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -35,6 +37,7 @@ import com.oppwa.mobile.connect.provider.TransactionType;
 import com.oppwa.mobile.connect.provider.listener.BinInfoListener;
 import com.oppwa.mobile.connect.provider.listener.ResponseListener;
 import com.oppwa.mobile.connect.provider.model.BinInfo;
+
 import java.util.List;
 import java.util.Map;
 
@@ -81,8 +84,9 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     public void createPaymentTransaction(ReadableMap params, Promise promise) {
         promisePaymentTransaction = promise;
         this.emitListeners("onProgress", true);
+
         try {
-            PaymentParams paymentParams = new CardPaymentParams(
+            CardPaymentParams paymentParams = new CardPaymentParams(
                     params.getString("checkoutID"),
                     params.getString("paymentBrand"),
                     params.getString("cardNumber"),
@@ -98,42 +102,22 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             if (!isNullOrEmpty(shopperResultURL)) {
                 paymentParams.setShopperResultUrl(shopperResultURL);
             }
-            Transaction transaction = null;
 
-            try {
-                Activity currentActivity = getCurrentActivity();
-                if (currentActivity == null) {
-                    this.emitListeners("onProgress", false);
-                    promisePaymentTransaction.reject("NO_ACTIVITY", "No foreground activity available");
-                    return;
-                }
-                Connect.ProviderMode providerMode = "LiveMode".equals(mode)
-                        ? Connect.ProviderMode.LIVE
-                        : Connect.ProviderMode.TEST;
-                OppPaymentProvider paymentProvider = new OppPaymentProvider(currentActivity, providerMode);
-
-                paymentProvider.setThreeDSWorkflowListener(new ThreeDSWorkflowListener() {
-                        @Override
-                        public Activity onThreeDSChallengeRequired() {
-                            return getCurrentActivity();
-                        }
-
-                        @Override
-                        public ThreeDSConfig onThreeDSConfigRequired() {
-                            ThreeDSConfig.Builder builder = new ThreeDSConfig.Builder();
-                            if (countryCode != null && !countryCode.isEmpty()) {
-                                builder.addClientConfigParam("OverrideCountryCode", countryCode);
-                            }
-                            builder.addClientConfigParam("AcceptAnyACSCert", "true");
-                            return builder.build();
-                        }
-                    });
-                transaction = new Transaction(paymentParams);
-                paymentProvider.submitTransaction(transaction, this);
-            } catch (PaymentException e) {
+            Activity currentActivity = getCurrentActivity();
+            if (currentActivity == null) {
                 this.emitListeners("onProgress", false);
-                promisePaymentTransaction.reject(e);
+                promisePaymentTransaction.reject("NO_ACTIVITY", "No foreground activity available");
+                return;
             }
+
+            Connect.ProviderMode providerMode = "LiveMode".equals(mode)
+                    ? Connect.ProviderMode.LIVE
+                    : Connect.ProviderMode.TEST;
+            OppPaymentProvider paymentProvider = new OppPaymentProvider(currentActivity, providerMode);
+            paymentProvider.setThreeDSWorkflowListener(createThreeDSWorkflowListener());
+
+            Transaction transaction = new Transaction(paymentParams);
+            paymentProvider.submitTransaction(transaction, this);
         } catch (PaymentException e) {
             this.emitListeners("onProgress", false);
             promisePaymentTransaction.reject(e);
@@ -293,7 +277,8 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     }
 
     private void emitListeners(String eventName, boolean isLoading) {
-        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+        getReactApplicationContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("onProgress", isLoading);
     }
 
@@ -410,13 +395,19 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             paymentResponse.putString("redirectURL", transaction.getRedirectUrl());
         }
 
-        promisePaymentTransaction.resolve(paymentResponse);
+        if (promisePaymentTransaction != null) {
+            promisePaymentTransaction.resolve(paymentResponse);
+            promisePaymentTransaction = null;
+        }
     }
 
     @Override
     public void transactionFailed(@NonNull Transaction transaction, @NonNull PaymentError paymentError) {
         this.emitListeners("onProgress", false);
-        promisePaymentTransaction.reject(paymentError.getErrorInfo());
+        if (promisePaymentTransaction != null) {
+            promisePaymentTransaction.reject(paymentError.getErrorInfo());
+            promisePaymentTransaction = null;
+        }
     }
 
     @Override
@@ -459,5 +450,4 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     public void binRequestFailed() {
         ITransactionListener.super.binRequestFailed();
     }
-
 }
