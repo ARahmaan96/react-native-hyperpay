@@ -139,6 +139,146 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
 
 }
 
+RCT_EXPORT_METHOD(requestCheckoutInfo:(NSString*)checkoutID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  [provider requestCheckoutInfoWithCheckoutID:checkoutID completionHandler:^(OPPCheckoutInfo * _Nullable checkoutInfo, NSError * _Nullable error) {
+    if (error) {
+      reject(@"requestCheckoutInfo", error.localizedDescription, error);
+      return;
+    }
+    resolve([self checkoutInfoToDictionary:checkoutInfo]);
+  }];
+}
+
+RCT_EXPORT_METHOD(requestCheckoutData:(NSString*)checkoutID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  [provider requestCheckoutDataWithCheckoutID:checkoutID completionHandler:^(OPPCheckoutData * _Nullable checkoutData, NSError * _Nullable error) {
+    if (error) {
+      reject(@"requestCheckoutData", error.localizedDescription, error);
+      return;
+    }
+    resolve(@{
+      @"amount": checkoutData.amount ?: [NSNull null],
+      @"currency": checkoutData.currency ?: [NSNull null],
+      @"taxAmount": checkoutData.taxAmount ?: [NSNull null],
+      @"merchantTransactionId": checkoutData.merchantTransactionID ?: [NSNull null]
+    });
+  }];
+}
+
+RCT_EXPORT_METHOD(getThreeDS2Warnings:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  [provider securityWarningsWithCompletionHandler:^(NSArray<Warning *> * _Nullable warnings, NSError * _Nullable error) {
+    if (error) {
+      reject(@"getThreeDS2Warnings", error.localizedDescription, error);
+      return;
+    }
+    NSMutableArray *result = [NSMutableArray new];
+    for (Warning *warning in warnings) {
+      [result addObject:@{
+        @"id": [warning getID] ?: [NSNull null],
+        @"message": [warning getMessage] ?: [NSNull null],
+        @"severity": [self severityToString:[warning getSeverity]]
+      }];
+    }
+    resolve(result);
+  }];
+}
+
+RCT_EXPORT_METHOD(validateBrands:(NSString*)checkoutID brands:(NSArray<NSString*>*)brands resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  [provider requestValidationsForPaymentBrands:brands checkoutID:checkoutID completionHandler:^(NSArray<OPPBrandInfo *> * _Nullable brandRules, NSError * _Nullable error) {
+    if (error) {
+      reject(@"validateBrands", error.localizedDescription, error);
+      return;
+    }
+    NSMutableArray *brandList = [NSMutableArray new];
+    for (OPPBrandInfo *brandInfo in brandRules) {
+      [brandList addObject:@{
+        @"brand": brandInfo.brand ?: [NSNull null],
+        @"label": brandInfo.label ?: [NSNull null],
+        @"renderType": brandInfo.renderType ?: [NSNull null],
+        @"isCardBrand": @(brandInfo.cardBrandInfo != nil),
+        @"isCustomUiRequired": @(brandInfo.isCustomUiRequired)
+      }];
+    }
+    resolve(@{@"brands": brandList});
+  }];
+}
+
+RCT_EXPORT_METHOD(requestImages:(NSArray<NSString*>*)brands resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  [provider requestLogoURLsForPaymentBrands:brands completionHandler:^(NSDictionary<NSString *,NSURL *> * _Nullable URLs, NSError * _Nullable error) {
+    if (error) {
+      reject(@"requestImages", error.localizedDescription, error);
+      return;
+    }
+    NSMutableDictionary *result = [NSMutableDictionary new];
+    for (NSString *brand in URLs) {
+      NSURL *url = URLs[brand];
+      result[brand] = @{
+        @"type": @"url",
+        @"width": [NSNull null],
+        @"height": [NSNull null],
+        @"url": url.absoluteString ?: [NSNull null],
+        @"content": [NSNull null]
+      };
+    }
+    resolve(result);
+  }];
+}
+
+RCT_EXPORT_METHOD(requestBinInfo:(NSString*)checkoutID bin:(NSString*)bin resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  [provider requestBinInfoWithCheckoutID:checkoutID bin:bin completionHandler:^(OPPBinInfo * _Nullable binInfo, NSError * _Nullable error) {
+    if (error) {
+      reject(@"requestBinInfo", error.localizedDescription, error);
+      return;
+    }
+    resolve(@{
+      @"brands": binInfo.brands ?: @[],
+      @"binType": binInfo.binType ?: [NSNull null],
+      @"type": binInfo.type ?: [NSNull null]
+    });
+  }];
+}
+
+- (NSDictionary *)checkoutInfoToDictionary:(OPPCheckoutInfo *)checkoutInfo {
+  return @{
+    @"endpoint": checkoutInfo.endpoint ?: [NSNull null],
+    @"resourcePath": checkoutInfo.resourcePath ?: [NSNull null],
+    @"amount": checkoutInfo.amount ?: [NSNull null],
+    @"currencyCode": checkoutInfo.currencyCode ?: [NSNull null],
+    @"countryCode": checkoutInfo.bankAccountCountry ?: [NSNull null],
+    @"shopBrandsOverridden": @(NO),
+    @"brandsActivated": @(YES),
+    @"collectRedShieldDeviceId": @(checkoutInfo.collectRedShieldDeviceId),
+    @"visaInstallmentEnabled": @(checkoutInfo.visaInstallmentConfig != nil),
+    @"logLevel": checkoutInfo.logLevel ?: [NSNull null],
+    @"msdkUi": [self msdkUiTypeToString:checkoutInfo.msdkUiType],
+    @"brands": @[],
+    @"klarnaMerchantIds": checkoutInfo.klarnaMerchantIDs ?: @[]
+  };
+}
+
+- (NSString *)severityToString:(Severity)severity {
+  switch (severity) {
+    case SeverityLOW:
+      return @"LOW";
+    case SeverityMEDIUM:
+      return @"MEDIUM";
+    case SeverityHIGH:
+      return @"HIGH";
+    default:
+      return @"UNKNOWN";
+  }
+}
+
+- (NSString *)msdkUiTypeToString:(OPPMsdkUiType)msdkUiType {
+  switch (msdkUiType) {
+    case OPPMsdkUiTypeNative:
+      return @"NATIVE";
+    case OPPMsdkUiTypeHybrid:
+      return @"HYBRID";
+    default:
+      return @"UNKNOWN";
+  }
+}
+
 #pragma mark - OPPCheckoutProviderDelegate
 
 - (void)checkoutProvider:(OPPCheckoutProvider *)checkoutProvider

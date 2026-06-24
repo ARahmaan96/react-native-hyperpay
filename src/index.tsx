@@ -3,6 +3,12 @@ import type {
   CreateTransactionParams,
   Config,
   ApplyPayParams,
+  CheckoutInfoResponse,
+  CheckoutDataResponse,
+  ThreeDS2Warning,
+  BrandsValidationResponse,
+  ImagesResponse,
+  BinInfoResponse,
 } from '../lib/typescript'
 import {
   getPaymentStatus
@@ -41,10 +47,40 @@ export function applePay(params: ApplyPayParams,
   return HyperPaySDK.applePay(params);
 }
 
+export function requestCheckoutInfo(checkoutID: string): Promise<CheckoutInfoResponse> {
+  return HyperPaySDK.requestCheckoutInfo(checkoutID);
+}
+
+export function requestCheckoutData(checkoutID: string): Promise<CheckoutDataResponse> {
+  return HyperPaySDK.requestCheckoutData(checkoutID);
+}
+
+export function getThreeDS2Warnings(): Promise<ThreeDS2Warning[]> {
+  return HyperPaySDK.getThreeDS2Warnings();
+}
+
+export function validateBrands(checkoutID: string, brands: string[]): Promise<BrandsValidationResponse> {
+  return HyperPaySDK.validateBrands(checkoutID, brands);
+}
+
+export function requestImages(brands: string[]): Promise<ImagesResponse> {
+  return HyperPaySDK.requestImages(brands);
+}
+
+export function requestBinInfo(checkoutID: string, bin: string): Promise<BinInfoResponse> {
+  return HyperPaySDK.requestBinInfo(checkoutID, bin);
+}
+
 const Hyperpay = {
   init,
   applePay,
   createPaymentTransaction,
+  requestCheckoutInfo,
+  requestCheckoutData,
+  getThreeDS2Warnings,
+  validateBrands,
+  requestImages,
+  requestBinInfo,
   getPaymentStatus,
 }
 export {

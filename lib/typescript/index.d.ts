@@ -57,6 +57,55 @@ export type ApplePayCallback = {
     /**  Request payment status for the synchronous transaction from your server using transactionPath.resourcePath or just checkout id.*/
     resourcePath?: string;
 }
+export type CheckoutInfoResponse = {
+    endpoint?: string;
+    resourcePath?: string;
+    amount: number;
+    currencyCode?: string;
+    countryCode?: string;
+    shopBrandsOverridden: boolean;
+    brandsActivated: boolean;
+    collectRedShieldDeviceId: boolean;
+    visaInstallmentEnabled: boolean;
+    logLevel?: string;
+    msdkUi?: string;
+    brands: string[];
+    klarnaMerchantIds: string[];
+}
+export type CheckoutDataResponse = {
+    amount?: string;
+    currency?: string;
+    taxAmount?: string;
+    merchantTransactionId?: string;
+}
+export type ThreeDS2Warning = {
+    id?: string;
+    message?: string;
+    severity?: string;
+}
+export type BrandValidationInfo = {
+    brand?: string;
+    label?: string;
+    renderType?: string;
+    isCardBrand: boolean;
+    isCustomUiRequired: boolean;
+}
+export type BrandsValidationResponse = {
+    brands: BrandValidationInfo[];
+}
+export type ImageInfo = {
+    type?: string;
+    width?: string;
+    height?: string;
+    url?: string;
+    content?: string;
+}
+export type ImagesResponse = Record<string, ImageInfo>;
+export type BinInfoResponse = {
+    brands: string[];
+    binType?: string;
+    type?: string;
+}
 export default class HyperPay {
     /**
        * @param  {string} shopperResultURL
@@ -96,6 +145,18 @@ export default class HyperPay {
 
     static createPaymentTransaction(params: CreateTransactionParams): Promise<CreateTransactionResponseType>;
 
+    static requestCheckoutInfo(checkoutID: string): Promise<CheckoutInfoResponse>;
+
+    static requestCheckoutData(checkoutID: string): Promise<CheckoutDataResponse>;
+
+    static getThreeDS2Warnings(): Promise<ThreeDS2Warning[]>;
+
+    static validateBrands(checkoutID: string, brands: string[]): Promise<BrandsValidationResponse>;
+
+    static requestImages(brands: string[]): Promise<ImagesResponse>;
+
+    static requestBinInfo(checkoutID: string, bin: string): Promise<BinInfoResponse>;
+
 
 
     /**
@@ -110,3 +171,9 @@ export default class HyperPay {
 export type { PaymentStatus }
 
 export declare function useTransactionLoading(): void
+export declare function requestCheckoutInfo(checkoutID: string): Promise<CheckoutInfoResponse>;
+export declare function requestCheckoutData(checkoutID: string): Promise<CheckoutDataResponse>;
+export declare function getThreeDS2Warnings(): Promise<ThreeDS2Warning[]>;
+export declare function validateBrands(checkoutID: string, brands: string[]): Promise<BrandsValidationResponse>;
+export declare function requestImages(brands: string[]): Promise<ImagesResponse>;
+export declare function requestBinInfo(checkoutID: string, bin: string): Promise<BinInfoResponse>;

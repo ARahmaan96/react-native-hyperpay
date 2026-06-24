@@ -226,6 +226,86 @@ const status = HyperPay.getPaymentStatus('000.000.000');
 
 ---
 
+### `HyperPay.requestCheckoutInfo(checkoutID)`
+
+Requests checkout metadata from the OPPWA SDK.
+
+```ts
+const info = await HyperPay.requestCheckoutInfo('CHECKOUT_ID');
+```
+
+Returns fields such as `resourcePath`, `amount`, `currencyCode`, `countryCode`, `brands`, and `msdkUi`.
+
+---
+
+### `HyperPay.requestCheckoutData(checkoutID)`
+
+Requests top-level checkout data from the OPPWA SDK.
+
+```ts
+const data = await HyperPay.requestCheckoutData('CHECKOUT_ID');
+```
+
+Returns `amount`, `currency`, `taxAmount`, and `merchantTransactionId` when available.
+
+---
+
+### `HyperPay.getThreeDS2Warnings()`
+
+Returns warnings reported by the Android 3DS2 SDK. This is useful for debugging Android 3DS device/configuration issues.
+
+```ts
+const warnings = await HyperPay.getThreeDS2Warnings();
+```
+
+Returns:
+
+```ts
+type ThreeDS2Warning = {
+  id?: string;
+  message?: string;
+  severity?: string;
+};
+```
+
+---
+
+### `HyperPay.validateBrands(checkoutID, brands)`
+
+Validates configured payment brands for a checkout.
+
+```ts
+const validation = await HyperPay.validateBrands('CHECKOUT_ID', ['VISA', 'MASTER']);
+```
+
+Returns brand metadata including `brand`, `label`, `renderType`, `isCardBrand`, and `isCustomUiRequired`.
+
+---
+
+### `HyperPay.requestImages(brands)`
+
+Requests brand image metadata from the OPPWA SDK.
+
+```ts
+const images = await HyperPay.requestImages(['VISA', 'MASTER']);
+```
+
+Returns an object keyed by brand, with image `type`, `width`, `height`, `url`, and `content` when available.
+
+---
+
+### `HyperPay.requestBinInfo(checkoutID, bin)`
+
+Requests BIN information for a card number prefix.
+
+```ts
+const binInfo = await HyperPay.requestBinInfo('CHECKOUT_ID', '411111');
+```
+
+Returns `brands`, `binType`, and `type`.
+
+---
+
 ### `useTransactionLoading()`
 
 React hook that returns the current transaction loading state by subscribing to the internal `onProgress` event.
