@@ -285,7 +285,8 @@ RCT_EXPORT_METHOD(requestBinInfo:(NSString*)checkoutID bin:(NSString*)bin resolv
 - (void)onThreeDSChallengeRequiredWithCompletion:(void (^)(UINavigationController *))completion {
     [self sendEventWithName:@"onThreeDSChallenge" body:@(YES)];
 
-    UINavigationController *navController = [[UINavigationController alloc] init];
+    UIViewController *challengeViewController = [[UIViewController alloc] init];
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:challengeViewController];
 
     dispatch_async(dispatch_get_main_queue(), ^{
         UIViewController *rootViewController = UIApplication.sharedApplication.keyWindow.rootViewController;
