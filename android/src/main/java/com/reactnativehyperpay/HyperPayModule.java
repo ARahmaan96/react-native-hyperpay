@@ -52,8 +52,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
         WritableMap config = Arguments.createMap();
         if (params.hasKey("shopperResultURL") && !params.isNull("shopperResultURL"))
             shopperResultURL = params.getString("shopperResultURL");
-        if (isNullOrEmpty(shopperResultURL))
-            shopperResultURL = getDefaultShopperResultURL();
+        shopperResultURL = getAndroidShopperResultURL(shopperResultURL);
         if (params.hasKey("merchantIdentifier"))
             merchantIdentifier = params.getString("merchantIdentifier");
         if (params.hasKey("countryCode"))
@@ -84,9 +83,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
             if (params.hasKey("shopperResultURL") && !params.isNull("shopperResultURL")) {
                 shopperResultURL = params.getString("shopperResultURL");
             }
-            if (isNullOrEmpty(shopperResultURL)) {
-                shopperResultURL = getDefaultShopperResultURL();
-            }
+            shopperResultURL = getAndroidShopperResultURL(shopperResultURL);
             if (!isNullOrEmpty(shopperResultURL)) {
                 paymentParams.setShopperResultUrl(shopperResultURL);
             }
@@ -139,6 +136,13 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
 
     private String getDefaultShopperResultURL() {
         return "oppwacheckout://" + getReactApplicationContext().getPackageName() + ".result";
+    }
+
+    private String getAndroidShopperResultURL(String value) {
+        if (isNullOrEmpty(value) || value.startsWith("http://") || value.startsWith("https://")) {
+            return getDefaultShopperResultURL();
+        }
+        return value;
     }
 
     private boolean isNullOrEmpty(String value) {

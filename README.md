@@ -54,6 +54,8 @@ npm install react-native-hyperpay
 
    The OPPWA Android SDK already contributes the required callback activity through manifest merging. Do not add `com.hyperpay.activities.PaymentActivity`; this package does not provide that activity.
 
+   Android callback URLs must be non-HTTP(S). If Android receives an `https://...` final 3DS URL, the OPPWA WebView can remain on a blank white page instead of completing the payment flow.
+
 2. Make sure the exact Android callback URL is whitelisted/used when creating the checkout on your backend.
 </details>
 
