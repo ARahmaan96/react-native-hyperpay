@@ -320,6 +320,25 @@ function PaymentScreen() {
 }
 ```
 
+### `useThreeDSChallenge()`
+
+React hook that returns `true` when a 3D Secure challenge is being presented to the user. Use this to show a full-screen overlay with a message like "3D Secure authentication in progress… Please don't close the app" to prevent users from seeing the black/blank screen that can appear while the 3DS WebView loads.
+
+```tsx
+import { useThreeDSChallenge } from 'react-native-hyperpay';
+
+function PaymentScreen() {
+  const is3DSActive = useThreeDSChallenge();
+
+  return is3DSActive ? (
+    <View style={StyleSheet.absoluteFill}>
+      <ActivityIndicator size="large" />
+      <Text>3D Secure authentication in progress…{'\n'}Please don't close the app</Text>
+    </View>
+  ) : null;
+}
+```
+
 ## Type Reference
 
 ### `Config`

@@ -170,7 +170,8 @@ export default class HyperPay {
 }
 export type { PaymentStatus }
 
-export declare function useTransactionLoading(): void
+export declare function useTransactionLoading(): boolean
+export declare function useThreeDSChallenge(): boolean
 export declare function requestCheckoutInfo(checkoutID: string): Promise<CheckoutInfoResponse>;
 export declare function requestCheckoutData(checkoutID: string): Promise<CheckoutDataResponse>;
 export declare function getThreeDS2Warnings(): Promise<ThreeDS2Warning[]>;

@@ -24,7 +24,7 @@ RCT_EXPORT_MODULE(HyperPay)
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"onTransactionComplete", @"onProgress"];
+    return @[@"onTransactionComplete", @"onProgress", @"onThreeDSChallenge"];
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(setup:(NSDictionary*)options) {
@@ -72,6 +72,7 @@ RCT_EXPORT_METHOD(createPaymentTransaction:(NSDictionary*)options resolver:(RCTP
     [_provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
         __strong HyperPay *strongSelf = weakSelf;
         [strongSelf sendEventWithName:@"onProgress" body:@(NO)];
+        [strongSelf sendEventWithName:@"onThreeDSChallenge" body:@(NO)];
 
         if (error) {
             reject(@"createTransaction", error.localizedDescription, error);
@@ -136,6 +137,7 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
         [self.provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
             __strong HyperPay *strongSelf = weakSelf;
             [strongSelf sendEventWithName:@"onProgress" body:@(NO)];
+            [strongSelf sendEventWithName:@"onThreeDSChallenge" body:@(NO)];
             if (error) {
                 if (strongSelf.applePayResolve) {
                     strongSelf.applePayReject(@"applePay", error.localizedDescription, error);
@@ -281,6 +283,8 @@ RCT_EXPORT_METHOD(requestBinInfo:(NSString*)checkoutID bin:(NSString*)bin resolv
 #pragma mark - OPPThreeDSEventListener
 
 - (void)onThreeDSChallengeRequiredWithCompletion:(void (^)(UINavigationController *))completion {
+    [self sendEventWithName:@"onThreeDSChallenge" body:@(YES)];
+
     UINavigationController *navController = [[UINavigationController alloc] init];
 
     dispatch_async(dispatch_get_main_queue(), ^{

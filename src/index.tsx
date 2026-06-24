@@ -84,7 +84,8 @@ const Hyperpay = {
   getPaymentStatus,
 }
 export {
-  useTransactionLoading
+  useTransactionLoading,
+  useThreeDSChallenge,
 } from './hooks'
 
 

@@ -296,10 +296,17 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
         return paymentProvider;
     }
 
+    private void emitThreeDSChallenge(boolean isActive) {
+        getReactApplicationContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("onThreeDSChallenge", isActive);
+    }
+
     private ThreeDSWorkflowListener createThreeDSWorkflowListener() {
         return new ThreeDSWorkflowListener() {
             @Override
             public Activity onThreeDSChallengeRequired() {
+                emitThreeDSChallenge(true);
                 return getCurrentActivity();
             }
 
@@ -384,6 +391,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     @Override
     public void transactionCompleted(@NonNull Transaction transaction) {
         this.emitListeners("onProgress", false);
+        this.emitThreeDSChallenge(false);
 
         WritableMap paymentResponse = Arguments.createMap();
         paymentResponse.putString("checkoutId", transaction.getPaymentParams().getCheckoutId());
@@ -404,6 +412,7 @@ public class HyperPayModule extends ReactContextBaseJavaModule implements ITrans
     @Override
     public void transactionFailed(@NonNull Transaction transaction, @NonNull PaymentError paymentError) {
         this.emitListeners("onProgress", false);
+        this.emitThreeDSChallenge(false);
         if (promisePaymentTransaction != null) {
             promisePaymentTransaction.reject(paymentError.getErrorInfo());
             promisePaymentTransaction = null;
