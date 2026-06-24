@@ -5,7 +5,7 @@ React Native payment SDK for Hyperpay / OP-Payment services using **OPPWA Mobile
 ## Installation
 
 ```sh
-npm install react-native-hyperpay
+npm install @a.rahman69/react-native-hyperpay
 ```
 
 <details>
