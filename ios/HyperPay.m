@@ -106,17 +106,17 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
     NSDecimalNumber *amount = [NSDecimalNumber decimalNumberWithMantissa:[[params valueForKey:@"amount"] intValue] exponent:-2 isNegative:NO];
     request.paymentSummaryItems = @[[PKPaymentSummaryItem summaryItemWithLabel:_companyName amount:amount]];
 
-    if ([OPPPaymentProvider canSubmitPaymentRequest:request]) {
-        _applePayResolve = resolve;
-        _applePayReject = reject;
-        PKPaymentAuthorizationViewController *vc = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest:request];
+    _applePayResolve = resolve;
+    _applePayReject = reject;
+    PKPaymentAuthorizationViewController *vc = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest:request];
+    if (vc) {
         vc.delegate = self;
         dispatch_async(dispatch_get_main_queue(), ^{
             UIViewController *rootViewController = UIApplication.sharedApplication.keyWindow.rootViewController;
             [rootViewController presentViewController:vc animated:YES completion:nil];
         });
     } else {
-        reject(@"applePay", @"Apple Pay not supported on this device", nil);
+        reject(@"applePay", @"Apple Pay is not available", nil);
     }
 }
 
