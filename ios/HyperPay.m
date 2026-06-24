@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "HyperPay.h"
 #import <React/RCTLog.h>
-#import <SafariServices/SafariServices.h>
+
 
 @implementation HyperPay
 
@@ -12,7 +12,6 @@ RCT_EXPORT_MODULE(HyperPay)
     self = [super init];
     if (self) {
         _provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeTest];
-        _provider.threeDSEventListener = self;
         _shopperResultURL = @"";
         _merchantIdentifier = @"";
         _countryCode = @"";
@@ -24,7 +23,7 @@ RCT_EXPORT_MODULE(HyperPay)
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"onTransactionComplete", @"onProgress", @"onThreeDSChallenge"];
+    return @[@"onTransactionComplete", @"onProgress"];
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(setup:(NSDictionary*)options) {
@@ -42,7 +41,6 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(setup:(NSDictionary*)options) {
         _mode = @"TestMode";
         _provider = [OPPPaymentProvider paymentProviderWithMode:OPPProviderModeTest];
     }
-    _provider.threeDSEventListener = self;
     return options;
 }
 
@@ -72,7 +70,6 @@ RCT_EXPORT_METHOD(createPaymentTransaction:(NSDictionary*)options resolver:(RCTP
     [_provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
         __strong HyperPay *strongSelf = weakSelf;
         [strongSelf sendEventWithName:@"onProgress" body:@(NO)];
-        [strongSelf sendEventWithName:@"onThreeDSChallenge" body:@(NO)];
 
         if (error) {
             reject(@"createTransaction", error.localizedDescription, error);
@@ -137,7 +134,6 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
         [self.provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
             __strong HyperPay *strongSelf = weakSelf;
             [strongSelf sendEventWithName:@"onProgress" body:@(NO)];
-            [strongSelf sendEventWithName:@"onThreeDSChallenge" body:@(NO)];
             if (error) {
                 if (strongSelf.applePayResolve) {
                     strongSelf.applePayReject(@"applePay", error.localizedDescription, error);
@@ -278,28 +274,6 @@ RCT_EXPORT_METHOD(requestBinInfo:(NSString*)checkoutID bin:(NSString*)bin resolv
             @"type": binInfo.type ?: [NSNull null]
         });
     }];
-}
-
-#pragma mark - OPPThreeDSEventListener
-
-- (void)onThreeDSChallengeRequiredWithCompletion:(void (^)(UINavigationController *))completion {
-    [self sendEventWithName:@"onThreeDSChallenge" body:@(YES)];
-
-    UIViewController *challengeViewController = [[UIViewController alloc] init];
-    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:challengeViewController];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UIViewController *rootViewController = UIApplication.sharedApplication.keyWindow.rootViewController;
-        [rootViewController presentViewController:navController animated:YES completion:nil];
-    });
-
-    completion(navController);
-}
-
-- (void)onThreeDSConfigRequiredWithCompletion:(void (^)(OPPThreeDSConfig *))completion {
-    OPPThreeDSConfig *config = [[OPPThreeDSConfig alloc] init];
-    config.appBundleID = [[NSBundle mainBundle] bundleIdentifier];
-    completion(config);
 }
 
 #pragma mark - Helpers

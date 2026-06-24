@@ -8,7 +8,7 @@
 #import <React/RCTEventEmitter.h>
 #import <PassKit/PassKit.h>
 
-@interface HyperPay : RCTEventEmitter <RCTBridgeModule, OPPThreeDSEventListener, PKPaymentAuthorizationViewControllerDelegate>
+@interface HyperPay : RCTEventEmitter <RCTBridgeModule, PKPaymentAuthorizationViewControllerDelegate>
 
 @property(nonatomic, strong) OPPPaymentProvider *provider;
 @property(nonatomic, strong) NSString *checkoutID;
