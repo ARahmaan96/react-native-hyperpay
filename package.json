@@ -1,5 +1,5 @@
 {
-  "name": "react-native-hyperpay",
+  "name": "@a.rahman69/react-native-hyperpay",
   "version": "2.1.0",
   "description": "React Native Hyperpay payment",
   "main": "lib/commonjs/index",
