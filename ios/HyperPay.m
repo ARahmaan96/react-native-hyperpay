@@ -102,7 +102,13 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
 
     PKPaymentRequest *request = [OPPPaymentProvider paymentRequestWithMerchantIdentifier:_merchantIdentifier
                                                                              countryCode:_countryCode];
-    request.supportedNetworks = _supportedNetworks;
+    if (_supportedNetworks.count > 0) {
+        request.supportedNetworks = _supportedNetworks;
+    } else if (@available(iOS 15.4, *)) {
+        request.supportedNetworks = PKPaymentAuthorizationViewController.availableNetworks;
+    } else {
+        request.supportedNetworks = @[PKPaymentNetworkVisa, PKPaymentNetworkMasterCard, PKPaymentNetworkAmex, PKPaymentNetworkDiscover];
+    }
     request.merchantCapabilities = PKMerchantCapability3DS;
     request.currencyCode = [[NSLocale currentLocale] objectForKey:NSLocaleCurrencyCode] ?: @"USD";
     NSDecimalNumber *amount = [NSDecimalNumber decimalNumberWithMantissa:[[params valueForKey:@"amount"] intValue] exponent:-2 isNegative:NO];
