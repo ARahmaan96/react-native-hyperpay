@@ -137,6 +137,7 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
                                                                                  tokenData:payment.token.paymentData
                                                                                      error:&error];
     if (params) {
+        params.shopperResultURL = _shopperResultURL;
         OPPTransaction *transaction = [OPPTransaction transactionWithPaymentParams:params];
         __weak HyperPay *weakSelf = self;
         [self.provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
