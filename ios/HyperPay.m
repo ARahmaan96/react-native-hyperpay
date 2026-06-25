@@ -2,10 +2,6 @@
 #import "HyperPay.h"
 #import <React/RCTLog.h>
 
-@interface PKPaymentAuthorizationViewController (HyperPayNetworks)
-@property (class, nonatomic, readonly) NSArray<PKPaymentNetwork> *availableNetworks;
-@end
-
 
 @implementation HyperPay
 
@@ -108,8 +104,6 @@ RCT_EXPORT_METHOD(applePay:(NSDictionary*)params resolver:(RCTPromiseResolveBloc
                                                                              countryCode:_countryCode];
     if (_supportedNetworks.count > 0) {
         request.supportedNetworks = _supportedNetworks;
-    } else if (@available(iOS 15.4, *)) {
-        request.supportedNetworks = PKPaymentAuthorizationViewController.availableNetworks;
     } else {
         request.supportedNetworks = @[PKPaymentNetworkVisa, PKPaymentNetworkMasterCard, PKPaymentNetworkAmex, PKPaymentNetworkDiscover];
     }
