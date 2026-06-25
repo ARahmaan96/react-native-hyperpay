@@ -3,7 +3,7 @@
 #import <React/RCTLog.h>
 
 @interface PKPaymentAuthorizationViewController (HyperPayNetworks)
-@property (class, nonatomic, readonly) NSArray<PKPaymentNetwork> *availableNetworks API_AVAILABLE(ios(15.4));
+@property (class, nonatomic, readonly) NSArray<PKPaymentNetwork> *availableNetworks;
 @end
 
 
